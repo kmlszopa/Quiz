@@ -12,6 +12,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="pl.kmlszopa.quiz.StartActivity">
 
+    <TextView
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quiz"
+        android:textSize="100dp"/>
     <EditText
         android:id="@+id/player_name"
         android:layout_width="match_parent"
@@ -31,6 +37,8 @@
         android:id="@+id/next"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start!"/>
+        android:text="Start!">
+        <requestFocus/>
+    </Button>
 
 </LinearLayout>

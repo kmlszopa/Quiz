@@ -1,21 +1,22 @@
 package pl.kmlszopa.quiz;
 
-import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class StartActivity extends AppCompatActivity {
+
     @BindView(R.id.player_name)
     protected EditText mName;
     @BindView(R.id.difficulty)
     protected Spinner mDifficulty;
-    private SharedPreferences mPrefs;
+    private UserPreferences mPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +24,9 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start);
         ButterKnife.bind(this);
 
-        mPrefs = getSharedPreferences("user", MODE_PRIVATE);
-        mName.setText(mPrefs.getString("username",""));
-
+        mPrefs = new UserPreferences(this);
+        mName.setText(mPrefs.getUsername());
+        mDifficulty.setSelection(mPrefs.getLevel());
     }
 
     @OnClick(R.id.next)
@@ -36,8 +37,15 @@ public class StartActivity extends AppCompatActivity {
             mName.setError("Brak nazwy gracza");
             return;
         }
-        // todo zapamietac nazwe gracza i poziom trudnosci
-        mPrefs.edit().putString("username", name).apply();
+
+        // sprawdzenia czy wybrano poziom trudnosci
+        int selectedLevel = mDifficulty.getSelectedItemPosition();
+        if (selectedLevel == 0) {
+            Toast.makeText(this, "Wybierz poziom trudności.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        mPrefs.setUsername(name);
+        mPrefs.setLevel(selectedLevel);
 
         // TODO losowanie puli pytan
         // TODO Otwarcie nowej aktywnosci
