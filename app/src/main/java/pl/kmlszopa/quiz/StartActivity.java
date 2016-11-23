@@ -15,12 +15,17 @@ public class StartActivity extends AppCompatActivity {
     protected EditText mName;
     @BindView(R.id.difficulty)
     protected Spinner mDifficulty;
+    private SharedPreferences mPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         ButterKnife.bind(this);
+
+        mPrefs = getSharedPreferences("user", MODE_PRIVATE);
+        mName.setText(mPrefs.getString("username",""));
+
     }
 
     @OnClick(R.id.next)
@@ -32,8 +37,7 @@ public class StartActivity extends AppCompatActivity {
             return;
         }
         // todo zapamietac nazwe gracza i poziom trudnosci
-        SharedPreferences prefs = getSharedPreferences("user",MODE_PRIVATE);
-        prefs.edit().putString("username",name).apply();
+        mPrefs.edit().putString("username", name).apply();
 
         // TODO losowanie puli pytan
         // TODO Otwarcie nowej aktywnosci
