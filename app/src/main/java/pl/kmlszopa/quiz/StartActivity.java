@@ -1,5 +1,6 @@
 package pl.kmlszopa.quiz;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
@@ -49,6 +50,8 @@ public class StartActivity extends AppCompatActivity {
 
         // TODO losowanie puli pytan
         // TODO Otwarcie nowej aktywnosci
+        Intent questionIntent = new Intent(this, QuestionActivity.class);
+        startActivity(questionIntent);
 
     }
 }
