@@ -7,11 +7,17 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class StartActivity extends AppCompatActivity {
+
 
     @BindView(R.id.player_name)
     protected EditText mName;
@@ -48,8 +54,18 @@ public class StartActivity extends AppCompatActivity {
         mPrefs.setUsername(name);
         mPrefs.setLevel(selectedLevel);
 
-        // TODO losowanie puli pytan
-        // TODO Otwarcie nowej aktywnosci
+        // losowanie puli pytan
+        QuestionsDataBase db = new MemoryQuestionsDataBase();
+        List<Question> questions = db.getQuestions(selectedLevel);
+        Random random = new Random();
+        while (questions.size() > 5) {
+            questions.remove(random.nextInt(questions.size()));
+        }
+
+        Collections.shuffle(questions);
+
+
+        // Otwarcie nowej aktywnosci
         Intent questionIntent = new Intent(this, QuestionActivity.class);
         startActivity(questionIntent);
 
