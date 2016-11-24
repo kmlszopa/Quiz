@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -25,6 +26,8 @@ public class QuestionActivity extends AppCompatActivity {
     protected RadioGroup mAnswers;
     @BindViews({R.id.answer_a, R.id.answer_b, R.id.answer_c})
     protected List<RadioButton> mAnswerButtons;
+    @BindView(R.id.button_next)
+    protected Button mNextButton;
 
     private List<Question> mQuestions;
     private int mCurrentQuestion = 0;
@@ -35,12 +38,30 @@ public class QuestionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_question);
         ButterKnife.bind(this);
 
         mQuestions = (List<Question>) getIntent().getSerializableExtra("questions");
         mAnswersArray = new int[mQuestions.size()];
 
+        refreshQuestionView();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mAnswersArray[mCurrentQuestion] = mAnswers.getCheckedRadioButtonId();
+        outState.putInt("position",mCurrentQuestion);
+        outState.putIntArray("answers",mAnswersArray);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentQuestion = savedInstanceState.getInt("position");
+        mAnswersArray = savedInstanceState.getIntArray("answers");
         refreshQuestionView();
     }
 
@@ -76,6 +97,7 @@ public class QuestionActivity extends AppCompatActivity {
         for (int i = 0; i < 3; i++) {
             mAnswerButtons.get(i).setText(q1.getAnswers().get(i));
         }
+        mNextButton.setText(mCurrentQuestion < mQuestions.size() - 1 ? "Dalej" : "Zakończ");
     }
 
     @OnClick(R.id.button_back)
@@ -85,6 +107,7 @@ public class QuestionActivity extends AppCompatActivity {
             return;
         }
         mAnswersArray[mCurrentQuestion] = mAnswers.getCheckedRadioButtonId();
+
         mCurrentQuestion--;
         refreshQuestionView();
     }
@@ -92,14 +115,15 @@ public class QuestionActivity extends AppCompatActivity {
     @OnClick(R.id.button_next)
     protected void onNextClick() {
         mAnswersArray[mCurrentQuestion] = mAnswers.getCheckedRadioButtonId();
+
+        if (mAnswers.getCheckedRadioButtonId() < 0) {
+            Toast.makeText(this, "Wybierz odpowiedź.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (mCurrentQuestion == mQuestions.size() - 1) {
             int correctAnswers = countCorrectAnswers();
             int totalAnswers = mAnswersArray.length;
             displayResults(correctAnswers, totalAnswers);
-            return;
-        }
-        if (mAnswers.getCheckedRadioButtonId() < 0) {
-            Toast.makeText(this, "Wybierz odpowiedź.", Toast.LENGTH_SHORT).show();
             return;
         }
         mCurrentQuestion++;
@@ -107,18 +131,8 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     private void displayResults(int correctAnswers, int totalAnswers) {
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Wynik quizu")
-                .setCancelable(false)
-                .setMessage("Odpowiedziałeś poprawnie na " + correctAnswers + " pytań z " + totalAnswers)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int which) {
-                        finish();
-                    }
-                })
-                .create();
-    dialog.show();
+       QuizResultsDialog.newInstance(correctAnswers,totalAnswers)
+               .show(getSupportFragmentManager(),null);
     }
 
 
@@ -135,4 +149,5 @@ public class QuestionActivity extends AppCompatActivity {
         }
         return sum;
     }
+
 }
