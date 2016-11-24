@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-public class MemoryQuestionsDatabase implements QuestionsDataBase {
+public class MemoryQuestionsDataBase implements QuestionsDataBase {
     @Override
     public List<Question> getQuestions(int difficulty) {
         Random random = new Random();

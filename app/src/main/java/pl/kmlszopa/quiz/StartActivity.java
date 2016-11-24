@@ -7,6 +7,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +68,7 @@ public class StartActivity extends AppCompatActivity {
 
         // Otwarcie nowej aktywnosci
         Intent questionIntent = new Intent(this, QuestionActivity.class);
+        questionIntent.putExtra("questions",new ArrayList<>(questions));
         startActivity(questionIntent);
 
     }
