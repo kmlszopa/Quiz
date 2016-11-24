@@ -1,5 +1,8 @@
 package pl.kmlszopa.quiz;
 
+import android.content.DialogInterface;
+import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.RadioButton;
@@ -8,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.concurrent.RunnableFuture;
 
 import butterknife.BindView;
 import butterknife.BindViews;
@@ -26,6 +30,8 @@ public class QuestionActivity extends AppCompatActivity {
     private int mCurrentQuestion = 0;
     private int[] mAnswersArray;
 
+    private boolean mFirstBackClicked;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,9 +44,31 @@ public class QuestionActivity extends AppCompatActivity {
         refreshQuestionView();
     }
 
+    @Override
+    public void onBackPressed() {
+        onBackTapped();
+    }
+
+    private void onBackTapped() {
+        if (!mFirstBackClicked) {
+            mFirstBackClicked = true;
+            Toast.makeText(this, "Tapnij ponownie, aby zakończyć", Toast.LENGTH_LONG).show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mFirstBackClicked = false;
+                }
+            }, 2000);
+        } else {
+            finish();
+
+
+        }
+    }
+
     private void refreshQuestionView() {
         mAnswers.clearCheck();
-        if(mAnswersArray[mCurrentQuestion]> 0){
+        if (mAnswersArray[mCurrentQuestion] > 0) {
             mAnswers.check(mAnswersArray[mCurrentQuestion]);
         }
         Question q1 = mQuestions.get(mCurrentQuestion);
@@ -53,7 +81,8 @@ public class QuestionActivity extends AppCompatActivity {
     @OnClick(R.id.button_back)
     protected void onBackClick() {
         if (mCurrentQuestion == 0) {
-            finish();
+            onBackTapped();
+            return;
         }
         mAnswersArray[mCurrentQuestion] = mAnswers.getCheckedRadioButtonId();
         mCurrentQuestion--;
@@ -62,15 +91,48 @@ public class QuestionActivity extends AppCompatActivity {
 
     @OnClick(R.id.button_next)
     protected void onNextClick() {
+        mAnswersArray[mCurrentQuestion] = mAnswers.getCheckedRadioButtonId();
         if (mCurrentQuestion == mQuestions.size() - 1) {
+            int correctAnswers = countCorrectAnswers();
+            int totalAnswers = mAnswersArray.length;
+            displayResults(correctAnswers, totalAnswers);
             return;
         }
-        mAnswersArray[mCurrentQuestion] = mAnswers.getCheckedRadioButtonId();
-        if (mAnswers.getCheckedRadioButtonId() < 0){
-            Toast.makeText(this,"Wybierz odpowiedź.",Toast.LENGTH_SHORT).show();
+        if (mAnswers.getCheckedRadioButtonId() < 0) {
+            Toast.makeText(this, "Wybierz odpowiedź.", Toast.LENGTH_SHORT).show();
             return;
         }
         mCurrentQuestion++;
         refreshQuestionView();
+    }
+
+    private void displayResults(int correctAnswers, int totalAnswers) {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Wynik quizu")
+                .setCancelable(false)
+                .setMessage("Odpowiedziałeś poprawnie na " + correctAnswers + " pytań z " + totalAnswers)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        finish();
+                    }
+                })
+                .create();
+    dialog.show();
+    }
+
+
+    private int countCorrectAnswers() {
+        int sum = 0;
+
+        for (int i = 0; i < mQuestions.size(); i++) {
+            Question question = mQuestions.get(i);
+            int userAnswerId = mAnswersArray[i];
+            int correctAnswerId = mAnswerButtons.get(question.getCorrectAnswer()).getId();
+            if (userAnswerId == correctAnswerId) {
+                sum++;
+            }
+        }
+        return sum;
     }
 }
